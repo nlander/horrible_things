@@ -11,9 +11,7 @@ boardSize = 8
 isplaceok :: [Int] -> Int -> Int -> MVar Bool -> IO ()
 isplaceok a n c result = do
   for_ [1..(n-1)]
-    (\i -> do
-           log i
-           if a !! (i - 1) == c ||
+    (\i -> if a !! (i - 1) == c ||
               a !! (i - 1) - i == c - n ||
               a !! (i - 1) + i == c + n
            then putMVar result False
@@ -21,11 +19,6 @@ isplaceok a n c result = do
     )
   _ <- tryPutMVar result True
   pure ()
-  where
-    log :: Int -> IO ()
-    log i =
-      let message = "i = " ++ show i
-      in putStrLn message
 
 printsolution :: [Int] -> IO ()
 printsolution a = do
@@ -44,28 +37,16 @@ addqueen placeokVar aRef n =
   then readIORef aRef >>= printsolution
   else for_ [1..boardSize] (\c -> do
            a <- readIORef aRef
-           log 1 a n c
            isplaceok a n c placeokVar
-           log 2 a n c
            placeok <- takeMVar placeokVar
-           log 3 a n c
            if placeok then do
              modifyIORef aRef $ set n c
-             log 4 a n c
              addqueen placeokVar aRef (n + 1)
            else pure ()
          )
   where
     set :: Int -> Int -> [Int] -> [Int]
     set i v l = take (i - 1) l ++ [v] ++ drop i l
-    log :: Int -> [Int] -> Int -> Int -> IO ()
-    log i a n c =
-      let message =
-            show i ++ ": a = "
-            ++ show a ++ ", n = "
-            ++ show n ++ ", c = "
-            ++ show c
-      in putStrLn message
 
 main :: IO ()
 main = do
