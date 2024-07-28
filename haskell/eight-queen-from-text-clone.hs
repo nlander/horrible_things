@@ -37,16 +37,28 @@ addqueen placeokVar aRef n =
   then readIORef aRef >>= printsolution
   else for_ [1..boardSize] (\c -> do
            a <- readIORef aRef
+           log 1 a n c
            isplaceok a n c placeokVar
+           log 2 a n c
            placeok <- takeMVar placeokVar
+           log 3 a n c
            if placeok then do
              modifyIORef aRef $ set n c
+             log 4 a n c
              addqueen placeokVar aRef (n + 1)
            else pure ()
          )
   where
     set :: Int -> Int -> [Int] -> [Int]
     set i v l = take (i - 1) l ++ [v] ++ drop i l
+    log :: Int -> [Int] -> Int -> Int -> IO ()
+    log i a n c =
+      let message =
+            show i ++ ": a = "
+            ++ show a ++ ", n = "
+            ++ show n ++ ", c = "
+            ++ show c
+      in putStrLn message
 
 main :: IO ()
 main = do
