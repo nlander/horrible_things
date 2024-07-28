@@ -11,7 +11,9 @@ boardSize = 8
 isplaceok :: [Int] -> Int -> Int -> MVar Bool -> IO ()
 isplaceok a n c result = do
   for_ [1..(n-1)]
-    (\i -> if a !! (i - 1) == c ||
+    (\i -> do
+           log i
+           if a !! (i - 1) == c ||
               a !! (i - 1) - i == c - n ||
               a !! (i - 1) + i == c + n
            then putMVar result False
@@ -19,6 +21,11 @@ isplaceok a n c result = do
     )
   _ <- tryPutMVar result True
   pure ()
+  where
+    log :: Int -> IO ()
+    log i =
+      let message = "i = " ++ show i
+      in putStrLn message
 
 printsolution :: [Int] -> IO ()
 printsolution a = do
