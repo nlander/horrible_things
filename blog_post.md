@@ -288,54 +288,36 @@ Let's break this down a little further so there's no confusion. To re-clarify, t
 The problematic case, as we can see from the logs, has `a = [1,3]`, `n = 3`, and `c = 3`. The value of `a` means that we have already placed a queen at row 1 column 1, and also at row 2 column 3. The values of `n` and `c` mean that the candidate position is at row 3 column 3. The candidate position is threatened on the diagonal by the first queen, so the second condition resolves to True:
 ```haskell
 a !! (i - 1) - i == c - n
-```
- | - substitute 1 in for i, 3 for c and 3 for n
- v
-```haskell
+-- | - substitute 1 in for i, 3 for c and 3 for n
+-- v
 a !! (1 - 1) - 1 == 3 - 3
-```
- | - evaluate within the parenthesis
- v
-```haskell
+-- | - evaluate within the parenthesis
+-- v
 a !! 0 - 1 == 3 - 3
-```
- | - get the value in `a` at Haskell list index 0
- v
-```haskell
+-- | - get the value in `a` at Haskell list index 0
+-- v
 1 - 1 == 3 - 3`
-```
- | - perform the subtractions
- v
-```haskell
+-- | - perform the subtractions
+-- v
 0 == 0
-```
- | - evaluate the equality
- v
-```haskell
+-- | - evaluate the equality
+-- v
 True
 ```
 As a result, we fill the MVar with the value False: `putMVar result False`. The MVar `result` is now blocked on further puts until `takeMVar` gets called, but `for_` is not done processing the list `a`! It continues for the second value of `i`. As it turns out, the second queen, at row 2 column 3, also threatens the candidate position. It is in the same column, so the first condition resolves to True:
 ```haskell
 a !! (i - 1) == c
-```
- | - substitute 1 in for i and 3 for c
- v
-```haskell
+-- | - substitute 1 in for i and 3 for c
+-- v
 a !! (2 - 1) == 3
-```
- | - evaluate within the parenthesis
- v
-```haskell
+-- | - evaluate within the parenthesis
+-- v
 a !! 1 == 3
-```
- | - get the value in `a` at Haskell list index 1
- v
-```haskell
+-- | - get the value in `a` at Haskell list index 1
+-- v
 3 == 3
-```
- | - evaluate the equality
- v
-```haskell
+-- | - evaluate the equality
+-- v
 True
 ```
 Once again, we try to put a False value in the `result` MVar: `putMVar result False`. This time though, the computation is blocked, because the MVar is already full. There is no asynchronous computation to empty the `result`, so the program blocks here, and crashes.
@@ -373,66 +355,46 @@ foldr f z = go
 The expression evaluates as follows:
 ```haskell
 take 2 [1,2,3,4]
-```
- | - apply definition of `take` and `zip`
- v
-```haskell
+-- | - apply definition of `take` and `zip`
+-- v
 map fst $ foldr f [] [(1,0), (2,1), (3,2), (4,3)]
   where
     f tuple@(a, n') l =
       if n' < 2 then tuple : l else []
-```
- | - apply definition of `foldr`
- v
-```haskell
+-- | - apply definition of `foldr`
+-- v
 map fst $ go [(1,0), (2,1), (3,2), (4,3)]
   where
     go [] = []
     go (x:xs) = x `f` go xs
     f tuple@(a, n') l =
       if n' < 2 then tuple : l else []
-```
- | - (From this point on I will elide the definitions
- | - of `f` and `go`, as they don't change).
- | - first application of `go` to the tuple list
- v
-```haskell
+-- | - (From this point on I will elide the definitions
+-- | - of `f` and `go`, as they don't change).
+-- | - first application of `go` to the tuple list
+-- v
 map fst $ (1,0) `f` go [(2,1), (3,2), (4,3)]
-```
- | - apply `f`
- v
-```haskell
+-- | - apply `f`
+-- v
 map fst $ (1,0) : go [(2,1), (3,2), (4,3)]
-```
- | - apply `go` 
- v
-```haskell
+-- | - apply `go` 
+-- v
 map fst $ (1,0) : (2,1) `f` go [(3,2), (4,3)]
-```
- | - apply `f`
- v
-```haskell
+-- | - apply `f`
+-- v
 map fst $ (1,0) : (2,1) : go [(3,2), (4,3)]
-```
- | - apply `go`
- v
-```haskell
+-- | - apply `go`
+-- v
 map fst $ (1,0) : (2,1) : (3,2) `f` go [(4,3)]
-```
- | - apply `f`
- | - `2 < 2` is false, so `f` returns an empty list
- v
-```haskell
+-- | - apply `f`
+-- | - `2 < 2` is false, so `f` returns an empty list
+-- v
 map fst $ (1,0) : (2,1) : []
-```
- | - list syntactic sugar
- v
-```haskell
+-- | - list syntactic sugar
+-- v
 map fst $ [(1,0), (2,1)]
-```
- | - apply `map fst`
- v
-```haskell
+-- | - apply `map fst`
+-- v
 [1,2]
 ```
 As we see in this example, `foldr` will only continue computation if the function `f` passed to it evaluates its second argument. When we reached the index (the second tuple element) that was not smaller than the argument `n`, the function `f` did not evaluate its second argument, and instead returned an empty list. This halted computation, because there were no more calls to `go` in the expression.
