@@ -9,13 +9,7 @@ The exercise in question is Chapter 2 of the book. The exercise begins with a co
 The problem presented in this exercise is called the Eight Queen Puzzle. Ierusalimschy describes the puzzle: "its goal is to position eight queens in a chessboard in such a way that no queen can
 attack another one" The book further details the problem as follows:
 
-> A first step to solving the eight-queen puzzle is to note that any valid solution must have exactly one queen
-> in each row. Therefore, we can represent potential solutions with a simple array of eight numbers, one for
-> each row; each number tells at which column is the queen at that row. For instance, the array {3, 7, 2,
-> 1, 8, 6, 5, 4} means that the queens are in the squares (1,3), (2,7), (3,2), (4,1), (5,8), (6,6), (7,5),
-> and (8,4). (By the way, this is not a valid solution; for instance, the queen in square (3,2) can attack the
-> one in square (4,1).) Note that any valid solution must be a permutation of the integers 1 to 8, as a valid
-> solution also must have exactly one queen in each column.
+> A first step to solving the eight-queen puzzle is to note that any valid solution must have exactly one queen in each row. Therefore, we can represent potential solutions with a simple array of eight numbers, one for each row; each number tells at which column is the queen at that row. For instance, the array {3, 7, 2, 1, 8, 6, 5, 4} means that the queens are in the squares (1,3), (2,7), (3,2), (4,1), (5,8), (6,6), (7,5), and (8,4). (By the way, this is not a valid solution; for instance, the queen in square (3,2) can attack the one in square (4,1).) Note that any valid solution must be a permutation of the integers 1 to 8, as a valid solution also must have exactly one queen in each column.
 
 Here is the initial solution program in Lua, as it is presented in the book:
 
@@ -64,14 +58,7 @@ addqueen({}, 1)
 ```
 Ierusalimschy explains the Lua solution:
 
-> The first function is isplaceok, which checks whether a given position on a board is free from attacks
-> from previously placed queens. More specifically, it checks whether putting the n-th queen in column c
-> will conflict with any of the previous n-1 queens already set in the array a. Remember that, by represen-
-> tation, two queens cannot be in the same row, so isplaceok checks whether there are no queens in the
-> same column or in the same diagonals of the new position.
-> Next we have the function printsolution, which prints a board. It simply traverses the entire board,
-> printing an X at positions with a queen and a - at other positions, without any fancy graphics. (Note its
-> use of the and–or idiom to select the character to print at each position.) Each result will look like this:
+> The first function is isplaceok, which checks whether a given position on a board is free from attacks from previously placed queens. More specifically, it checks whether putting the n-th queen in column c will conflict with any of the previous n-1 queens already set in the array a. Remember that, by represen- tation, two queens cannot be in the same row, so isplaceok checks whether there are no queens in the same column or in the same diagonals of the new position. Next we have the function printsolution, which prints a board. It simply traverses the entire board, printing an X at positions with a queen and a - at other positions, without any fancy graphics. (Note its use of the and–or idiom to select the character to print at each position.) Each result will look like this:
 
 ```
 X - - - - - - -
@@ -83,12 +70,7 @@ X - - - - - - -
 - X - - - - - -
 - - - X - - - -
 ```
-> The last function, addqueen, is the core of the program. It tries to place all queens larger than or equal
-> to n in the board. It uses backtracking to search for valid solutions. First, it checks whether the solution
-> is complete and, if so, prints that solution. Otherwise, it loops through all columns for the n-th queen; for
-> each column that is free from attacks, the program places the queen there and recursively tries to place
-> the following queens.
-> Finally, the main body simply calls addqueen on an empty solution.
+> The last function, addqueen, is the core of the program. It tries to place all queens larger than or equal to n in the board. It uses backtracking to search for valid solutions. First, it checks whether the solution is complete and, if so, prints that solution. Otherwise, it loops through all columns for the n-th queen; for each column that is free from attacks, the program places the queen there and recursively tries to place the following queens. Finally, the main body simply calls addqueen on an empty solution.
 
 After reading this explanation, I copied the lua code into my text editor and ran it. I was surprised to see that the program prints not just one, but all of the solutions to the Eight Queen Puzzle! Why did I find it difficult to understand about this program's behavior? At a first glance, I thought that it would print only the first solution it encountered. After all, when the board is full, it hits the recursive "base case" and ends execution after printing the solution. What I failed to notice is that the recursive call in `addqueen` happens _inside a for loop_. So while the execution of that particular recursive tree may have terminated, the for loop in which that recursive function call was made is still running! This is not at all idiomatic in functional programming, even though it is technically possible to put a recursive call inside of a fold.
 
